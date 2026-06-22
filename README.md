@@ -1,6 +1,6 @@
 # Corrective Retrieval-Augmented Generation (CRAG) Project
 
-This project implements a Corrective Retrieval-Augmented Generation (CRAG) system, consisting of a FastAPI backend and a Streamlit frontend. The system is designed to handle document retrieval more intelligently by evaluating the relevance of retrieved documents and using a web search as a fallback when necessary.
+This project implements a Corrective Retrieval-Augmented Generation (CRAG) system, consisting of a FastAPI backend and a Streamlit frontend. 
 
 ## Architecture Overview
 
@@ -33,10 +33,10 @@ The system follows the CRAG logic:
 ## Features
 
 - **Dynamic Retrieval**: Uses LangGraph to manage a stateful RAG workflow.
-- **PDF Support**: Upload and index PDF documents directly from the UI.
+- **PDF Support**: Upload PDF documents directly from the UI those are then stored in vector database and also local temp file.
 - **Web Search Integration**: Uses Tavily Search API for external information retrieval.
-- **Vector Store**: ChromaDB with Hugging Face embeddings (`BAAI/bge-m3`).
-- **LLM Integration**: Uses OpenRouter to access gpt-oss-120b or other models.
+- **Vector Store**: store data in ChromaDB with Hugging Face embeddings (`BAAI/bge-m3`) using api calls.
+- **LLM Integration**: Uses OpenRouter to access gpt-oss-120b to answer the user questions which comes with the context provided by the CRAG.
 
 ## Setup Instructions
 
