@@ -1,0 +1,42 @@
+# Python bytecode (compiled files)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets (CRITICAL for security)
+.env
+.env.*
+!.env.example
+secrets.json
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Database files (if using local SQLite for development)
+*.sqlite3
+*.db
+
+# Testing and Coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+chroma_db/
+temp_pdfs/

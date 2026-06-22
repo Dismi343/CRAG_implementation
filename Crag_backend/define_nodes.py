@@ -1,0 +1,123 @@
+from langchain_core.documents import Document
+from nodes.web_search import tavily_web_search
+from nodes.question_rewriter import question_rewriter
+from nodes.retrieval_evalv import retrival_evaluator_llm
+from nodes.rag_chain import rag_generate
+from nodes.vector_store import get_retriever
+
+
+def retrieve(state):
+    """
+    Retrieve documents
+    Args:
+        state (dict): The current graph state
+    Returns:
+        state (dict): New key added to state, documents, that contains retrieved documents
+    """
+    print("---RETRIEVE---")
+    question = state["question"]
+    # Retrieval
+    documents = get_retriever(question)
+    return {"documents": documents, "question": question}
+
+def generate(state):
+    """
+    Generate answer
+    Args:
+        state (dict): The current graph state
+    Returns:
+        state (dict): New key added to state, generation, that contains LLM generation
+    """
+    print("---GENERATE---")
+    question = state["question"]
+    documents = state["documents"]
+    # RAG generation
+    generation = rag_generate(documents, question)
+    return {"documents": documents, "question": question, "generation": generation}
+
+def evaluate_documents(state):
+    """
+    Determines whether the retrieved documents are relevant to the question.
+    Args:
+        state (dict): The current graph state
+    Returns:
+        state (dict): Updates documents key with only filtered relevant documents
+    """
+    print("---CHECK DOCUMENT RELEVANCE TO QUESTION---")
+    question = state["question"]
+    documents = state["documents"]
+    # Score each doc
+    filtered_docs = []
+    web_search = "No"
+    for d in documents:
+        score = retrival_evaluator_llm([d], question)
+        grade = score.binary_score
+        if grade == "yes":
+            print("---GRADE: DOCUMENT RELEVANT---")
+            filtered_docs.append(d)
+        else:
+            print("---GRADE: DOCUMENT NOT RELEVANT---")
+            continue
+    if len(filtered_docs) / len(documents) <= 0.7:
+        web_search = "Yes"
+    return {"documents": filtered_docs, "question": question, "web_search": web_search}
+
+def transform_query(state):
+    """
+    Transform the query to produce a better question.
+    Args:
+        state (dict): The current graph state
+    Returns:
+        state (dict): Updates question key with a re-phrased question
+    """
+    print("---TRANSFORM QUERY---")
+    question = state["question"]
+    documents = state["documents"]
+    # Re-write question
+    #better_question = question_rewriter.invoke({"question": question})
+    better_question = question_rewriter(question)
+    return {"documents": documents, "question": better_question}
+
+def web_search(state):
+    """
+    Web search based on the re-phrased question.
+    Args:
+        state (dict): The current graph state
+    Returns:
+        state (dict): Updates documents key with appended web results
+    """
+    print("---WEB SEARCH---")
+    question = state["question"]
+    documents = state["documents"]
+    # Web search
+    #docs = web_search_tool.invoke({"query": question})
+    docs = tavily_web_search(question)
+    web_results = "\\n".join([d["content"] for d in docs])
+    web_results = Document(page_content=web_results)
+    documents.append(web_results)
+    return {"documents": documents, "question": question}
+
+
+def decide_to_generate(state):
+    """
+    Determines whether to generate an answer, or re-generate a question.
+    Args:
+        state (dict): The current graph state
+    Returns:
+        str: Binary decision for next node to call
+    """
+    print("---ASSESS GRADED DOCUMENTS---")
+    state["question"]
+    web_search = state["web_search"]
+    state["documents"]
+    if web_search == "Yes":
+        # All documents have been filtered check_relevance
+        # We will re-generate a new query
+        print(
+            "---DECISION: ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, TRANSFORM QUERY---"
+        )
+        return "transform_query"
+    else:
+        # We have relevant documents, so generate answer
+        print("---DECISION: GENERATE---")
+        return "generate"

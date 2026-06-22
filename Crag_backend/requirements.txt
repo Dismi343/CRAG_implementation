@@ -1,0 +1,16 @@
+uvicorn
+langchain_community 
+tiktoken 
+langchain-openai 
+langchainhub 
+chromadb 
+langchain-chroma
+langchain 
+langgraph 
+tavily-python
+python-dotenv
+fastapi
+langchain_huggingface
+torch
+beautifulsoup4
+pypdf
